@@ -16,6 +16,7 @@ def evaluate(expression, objectGroup=None, returnByValue=None):
     command = Command('Runtime.evaluate', params)
     return command
 
+
 def evaluate_parser(result):
     data = RemoteObject(result['result'])
     return data

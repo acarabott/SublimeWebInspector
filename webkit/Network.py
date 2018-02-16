@@ -15,6 +15,7 @@ def setCacheDisabled(value):
     command = Command('Network.setCacheDisabled', {'cacheDisabled': value})
     return command
 
+
 def setUserAgentOverride(value):
     command = Command('Network.setUserAgentOverride', {'userAgent': value})
     return command

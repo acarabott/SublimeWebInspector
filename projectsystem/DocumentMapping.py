@@ -4,14 +4,16 @@ from projectsystem import Sourcemap
 
 logger = logging.getLogger("SWI")
 
+
 class Position:
     """ All lines and columns in Sublime, in source maps,
         and in the WebKit protocol are explicitly specified to be
         zero-based
     """
+
     def __init__(self, file_name, line, column):
         if (line < 0 or column < 0):
-             raise ValueError("Invalid arguments")
+            raise ValueError("Invalid arguments")
 
         # zero-based line and column values
         self.__file_name = file_name
@@ -79,7 +81,8 @@ class MappingsManager:
 
             # Delete corresponding authored source mappings
             for authored_source in mapping.get_authored_files():
-                MappingsManager.authored_file_mappings.pop(authored_source.lower())
+                MappingsManager.authored_file_mappings.pop(
+                    authored_source.lower())
 
     @staticmethod
     def delete_all_mappings():
@@ -91,7 +94,7 @@ class MappingInfo:
     authored_sources = []
     generated_file = None
     line_mappings = []
- 
+
     def __init__(self, generated_file):
 
         source_map_file = Sourcemap.get_sourcemap_file(generated_file)
@@ -107,7 +110,8 @@ class MappingInfo:
         self.generated_file = generated_file
         self.authored_sources = self.parsed_source_map.get_authored_sources_path()
 
-        [logger.info('    Found authored source %s which exists? %s' % (s, str(os.path.isfile(s)))) for s in self.authored_sources]
+        [logger.info('    Found authored source %s which exists? %s' % (
+            s, str(os.path.isfile(s)))) for s in self.authored_sources]
 
         self.line_mappings = self.parsed_source_map.line_mappings
 
@@ -128,7 +132,9 @@ class MappingInfo:
         mapping_index = Sourcemap.LineMapping.binary_search(self.line_mappings,
                                                             zero_based_line,
                                                             zero_based_column,
-                                                            lambda line_mapping, line, column: Sourcemap.LineMapping.compare_generated_mappings(line_mapping, line, column))
+                                                            lambda line_mapping,
+                                                            line,
+                                                            column: Sourcemap.LineMapping.compare_generated_mappings(line_mapping, line, column))
 
         line_number = max(self.line_mappings[mapping_index].source_line, 0)
         column_number = max(self.line_mappings[mapping_index].source_column, 0)
@@ -143,7 +149,8 @@ class MappingInfo:
 
         # Get all the line mappings corresponding to this file
         authored_file_index = self.authored_sources.index(authored_file_name)
-        line_mappings = [x for x in self.line_mappings if x.file_num == authored_file_index]
+        line_mappings = [
+            x for x in self.line_mappings if x.file_num == authored_file_index]
 
         if len(line_mappings) == 0:
             return None
@@ -155,6 +162,5 @@ class MappingInfo:
 
         line_number = max(line_mappings[mapping_index].generated_line, 0)
         column_number = max(line_mappings[mapping_index].generated_column, 0)
-        file_number = max(line_mappings[mapping_index].file_num, 0)
 
         return Position(self.generated_file, line_number, column_number)

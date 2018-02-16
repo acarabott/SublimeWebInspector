@@ -2,17 +2,20 @@ import config
 import utils
 import sublime
 import sublime_plugin
+import os
 
 ####################################################################################
 #   VIEW
 ####################################################################################
 
+
 class SwiDebugView(object):
     """ The SWIDebugView wraps a normal view, adding some convenience methods.
         See wrap_view.
-        All calls to a View should be made through an SWIDebugView, 
+        All calls to a View should be made through an SWIDebugView,
         adding more passthroughs if necessary. This makes the code flow explicit.
     """
+
     def __init__(self, v):
         self.view = v
         self.callbacks = []
@@ -42,10 +45,10 @@ class SwiDebugView(object):
     def get_regions(self, key):
         return self.view.get_regions(key)
 
-    def add_regions(self, key, regions, scope = "", icon = "", flags = 0):
+    def add_regions(self, key, regions, scope="", icon="", flags=0):
         return self.view.add_regions(key, regions, scope, icon, flags)
 
-    def run_command(self, cmd, args = None):
+    def run_command(self, cmd, args=None):
         return self.view.run_command(cmd, args)
 
     def size(self):
@@ -63,18 +66,18 @@ class SwiDebugView(object):
     def uri(self):
         return 'file://' + os.path.realpath(self.view.file_name())
 
-    def show(self, x, show_surrounds = True):
+    def show(self, x, show_surrounds=True):
         return self.view.show(x, show_surrounds)
 
     def rowcol(self, tp):
         return self.view.rowcol(tp)
 
     def lines(self, data=None):
-        """ Takes a list of line numbers (zero based), 
+        """ Takes a list of line numbers (zero based),
             regions, or else uses the selection.
-            Returns regions, each covering one complete line, 
+            Returns regions, each covering one complete line,
             representing the lines included in the supplied input.
-        """ 
+        """
         lines = []
         if data is None:
             regions = self.view.sel()
@@ -84,7 +87,8 @@ class SwiDebugView(object):
             regions = []
             for item in data:
                 if type(item) == int or item.isdigit():
-                    regions.append(self.view.line(self.view.text_point(int(item), 0)))
+                    regions.append(self.view.line(
+                        self.view.text_point(int(item), 0)))
                 else:
                     regions.append(item)
 
@@ -115,22 +119,25 @@ class SwiDebugView(object):
                 break
             insert_before += 1
 
-        self.callbacks.insert(insert_before, { "callback": callback, "args": args })
+        self.callbacks.insert(
+            insert_before, {"callback": callback, "args": args})
 
         regions.append(new_region)
-        self.view.add_regions('swi_log_clicks', regions, scope=utils.get_setting('interactive_scope'), flags=sublime.DRAW_NO_FILL)
+        self.view.add_regions('swi_log_clicks', regions, scope=utils.get_setting(
+            'interactive_scope'), flags=sublime.DRAW_NO_FILL)
 
     def remove_click(self, index):
         """ Removes a clickable "button" with the specified index."""
         regions = self.view.get_regions('swi_log_clicks')
         del regions[index]
-        self.view.add_regions('swi_log_clicks', regions, scope=utils.get_setting('interactive_scope'), flags=sublime.DRAW_NO_FILL)
+        self.view.add_regions('swi_log_clicks', regions, scope=utils.get_setting(
+            'interactive_scope'), flags=sublime.DRAW_NO_FILL)
 
     def erase(self, edit, region):
-        """ Removes our clickable regions 
+        """ Removes our clickable regions
             then erases the view
         """
-        self.callbacks = [] # bug, should only erase callbacks in the region
+        self.callbacks = []  # bug, should only erase callbacks in the region
         self.view.erase(edit, region)
 
     def check_click(self):
@@ -150,10 +157,12 @@ class SwiDebugView(object):
 
             index += 1
 
+
 def find_existing_view(console_type):
     return find_or_create_view(console_type, False)
 
-def find_or_create_view(console_type, create = True):
+
+def find_or_create_view(console_type, create=True):
     found = False
     v = None
     window = sublime.active_window()
@@ -212,6 +221,7 @@ def find_or_create_view(console_type, create = True):
 
     return wrap_view(v)
 
+
 def wrap_view(v):
     """     Convert a Sublime View into an SWIDebugView
     """
@@ -220,7 +230,7 @@ def wrap_view(v):
     if isinstance(v, sublime.View):
         id = v.buffer_id()
         # Take this opportunity to replace the wrapped view,
-        # if it's against the same buffer as the previously 
+        # if it's against the same buffer as the previously
         # seen view
         if id in config.buffers:
             config.buffers[id].view = v
@@ -228,6 +238,7 @@ def wrap_view(v):
             config.buffers[id] = SwiDebugView(v)
         return config.buffers[id]
     return None
+
 
 def clear_view(name):
     v = find_existing_view(name)
@@ -244,24 +255,29 @@ def clear_view(name):
 
     window.focus_group(0)
 
-class SwiClearViewInternalCommand(sublime_plugin.TextCommand): 
+
+class SwiClearViewInternalCommand(sublime_plugin.TextCommand):
     """ Called internally on a specific view """
+
     def run(self, edit, user_input=None):
         v = wrap_view(self.view)
         v.erase(edit, sublime.Region(0, self.view.size()))
 
+
 class SwiMouseUpCommand(sublime_plugin.TextCommand):
     """ We use this to discover a "button" has been clicked.
         Previously used on_selection_modified, but it fires
-        more than once per click. and there is no "mouse_up" 
+        more than once per click. and there is no "mouse_up"
         event in Sublime to filter those out.
         This event handler is hooked up to mouse1 in
         Default (xxx).sublime-mousemap - it's not via
         the standard EventListener.
     """
+
     def run(self, edit):
         utils.assert_main_thread()
         wrap_view(self.view).check_click()
+
 
 class SwiDoubleMouseUpCommand(sublime_plugin.TextCommand):
     """ On a double click, we get one of each event, so
@@ -269,5 +285,6 @@ class SwiDoubleMouseUpCommand(sublime_plugin.TextCommand):
         Triple click does not get handled reliably, it
         may only be treated as two.
     """
+
     def run(self, edit):
         self.view.run_command("swi_mouse_up")

@@ -19,7 +19,8 @@ class Notification(object):
     def __init__(self, notification_name):
         self.name = notification_name
         try:
-            self.parser = eval('webkit.' + notification_name + '_parser', {'webkit': __import__('webkit')})
+            self.parser = eval('webkit.' + notification_name +
+                               '_parser', {'webkit': __import__('webkit')})
         except:
             self.parser = Notification.default_parser
         self.lastResponse = None
@@ -27,7 +28,7 @@ class Notification(object):
 
     @staticmethod
     def default_parser(params):
-        print (params)
+        print(params)
         return params
 
 
@@ -36,7 +37,8 @@ class Command(object):
         self.request = {'id': 0, 'method': '', 'params': params}
         self.method = method_name
         try:
-            self.parser = eval('webkit.' + method_name + '_parser', {'webkit': __import__('webkit')})
+            self.parser = eval('webkit.' + method_name +
+                               '_parser', {'webkit': __import__('webkit')})
         except:
             self.parser = Command.default_parser
         self.params = params

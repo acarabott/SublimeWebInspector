@@ -1,6 +1,5 @@
 from .wkutils import Command, Notification, WebkitObject
 from .Runtime import RemoteObject
-import json
 import re
 
 
@@ -13,13 +12,16 @@ def enable():
     command = Command('Debugger.enable', {})
     return command
 
+
 def setPauseOnExceptions(state):
     command = Command('Debugger.setPauseOnExceptions', {"state": state})
     return command
 
+
 def setOverlayMessage(message=None):
     if message:
-        command = Command('Page.setOverlayMessage', {"message":"Paused in Sublime Web Inspector"})
+        command = Command('Page.setOverlayMessage', {
+                          "message": "Paused in Sublime Web Inspector"})
     else:
         command = Command('Page.setOverlayMessage', {})
     return command
@@ -39,12 +41,14 @@ def evaluateOnCallFrame_parser(result):
 
 
 def disable():
-    command = Command('Debugger.disable', {}) 
+    command = Command('Debugger.disable', {})
     return command
+
 
 def setSkipAllPauses(state):
     command = Command('Debugger.setSkipAllPauses', {"skipped": state})
     return command
+
 
 def pause():
     command = Command('Debugger.pause', {})
@@ -54,6 +58,7 @@ def pause():
 def resume():
     command = Command('Debugger.resume', {})
     return command
+
 
 def stepInto():
     command = Command('Debugger.stepInto', {})
@@ -80,7 +85,7 @@ def removeBreakpoint(breakpointId):
 def setBreakpoint(location, condition=None):
     """ Line and column are zero based """
     params = {}
-    
+
     location.lineNumber = location.lineNumber
     params['location'] = location()
 
@@ -166,9 +171,11 @@ def paused():
     notification = Notification('Debugger.paused')
     return notification
 
+
 def globalObjectCleared():
     notification = Notification("Debugger.globalObjectCleared")
     return notification
+
 
 def paused_parser(params):
     data = {}
@@ -178,7 +185,9 @@ def paused_parser(params):
     data['reason'] = params['reason']
     return data
 
+
 url_to_originalUrl = {}
+
 
 def stripQueryString(url):
     # Some users use query strings as cache breakers
@@ -191,10 +200,12 @@ def stripQueryString(url):
         url_to_originalUrl[cleanUrl] = url
     return cleanUrl
 
+
 def restoreQueryString(url):
     if url in url_to_originalUrl:
         url = url_to_originalUrl[url]
     return url
+
 
 def resumed():
     notification = Notification('Debugger.resumed')
@@ -242,6 +253,7 @@ class Scope(WebkitObject):
 
 class Location(WebkitObject):
     """ Line and column are zero based """
+
     def __init__(self, value):
         self.set(value, 'columnNumber')
         self.set(value, 'lineNumber')

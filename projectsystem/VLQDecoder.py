@@ -1,11 +1,13 @@
 encoded_values = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
+
 def decode_char(char):
     if len(char) == 1:
         return encoded_values.index(char)
-    
+
     # Return -1 if invalid input
     return -1
+
 
 def decode(input_string, offset):
     result = 0
@@ -32,4 +34,4 @@ def decode(input_string, offset):
         if ((byte & 32) == 32):
             continue
         else:
-            return { 'value': -result if negative else result, 'chars_read': (i - offset + 1) }
+            return {'value': -result if negative else result, 'chars_read': (i - offset + 1)}

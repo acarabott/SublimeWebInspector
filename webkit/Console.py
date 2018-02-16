@@ -3,25 +3,25 @@ from .Runtime import RemoteObject
 from .Network import RequestId
 
 
-### Console.clearMessages
+# Console.clearMessages
 def clearMessages():
     command = Command('Console.clearMessages')
     return command
 
 
-### Console.disable
+# Console.disable
 def disable():
     command = Command('Console.disable')
     return command
 
 
-### Console.enable
+# Console.enable
 def enable():
     command = Command('Console.enable')
     return command
 
 
-### Console.messageAdded
+# Console.messageAdded
 def messageAdded():
     notification = Notification('Console.messageAdded')
     return notification
@@ -32,7 +32,7 @@ def messageAdded_parser(params):
     return result
 
 
-### Console.messageRepeatCountUpdated
+# Console.messageRepeatCountUpdated
 def messageRepeatCountUpdated():
     notification = Notification('Console.messageRepeatCountUpdated')
     return notification
@@ -42,7 +42,7 @@ def messageRepeatCountUpdate_parser(params):
     return params['count']
 
 
-### Console.messagesCleared
+# Console.messagesCleared
 def messagesCleared():
     notification = Notification('Console.messagesCleared')
     return notification

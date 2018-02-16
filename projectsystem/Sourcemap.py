@@ -5,6 +5,7 @@ from projectsystem import VLQDecoder
 
 logger = logging.getLogger("SWI")
 
+
 def get_sourcemap_file(file_name):
     sourcemap_prefix = "//# sourceMappingURL="
     map_file = ""
@@ -18,11 +19,13 @@ def get_sourcemap_file(file_name):
                 index = sourcemap_info.find(sourcemap_prefix)
                 if index == 0:
                     map_file = sourcemap_info[len(sourcemap_prefix):].strip()
-                    map_file = os.path.dirname(file_name) + os.path.sep + map_file
+                    map_file = os.path.dirname(
+                        file_name) + os.path.sep + map_file
                     logger.info('    Found %s' % (sourcemap_info))
             f.close()
     except Exception as e:
-        logger.info('    Could not read %s for sourceMappingURL: %s' % (file_name, str(e)))
+        logger.info('    Could not read %s for sourceMappingURL: %s' %
+                    (file_name, str(e)))
         pass
 
     return map_file
@@ -32,7 +35,7 @@ class ParsedSourceMap:
     def __init__(self, file_name):
         self.authored_sources = None
         self.line_mappings = None
-        
+
         logger.info('    Reading source map %s' % (file_name))
 
         try:
@@ -40,14 +43,17 @@ class ParsedSourceMap:
             with open(file_name, "r", encoding="utf8") as f:
                 self.content = json.loads(f.read())
                 f.close()
-    
+
             if self.content:
-                self.root_path = os.path.abspath(os.path.dirname(file_name) + os.path.sep + self.content["sourceRoot"]) 
+                self.root_path = os.path.abspath(os.path.dirname(
+                    file_name) + os.path.sep + self.content["sourceRoot"])
                 self.version = self.content["version"]
                 self.authored_sources = self.content["sources"]
-                self.line_mappings = SourceMapParser.calculate_line_mappings(self.content)
+                self.line_mappings = SourceMapParser.calculate_line_mappings(
+                    self.content)
         except Exception as e:
-            logger.info('    Could not read source map %s: %s' % (file_name, str(e)))
+            logger.info('    Could not read source map %s: %s' %
+                        (file_name, str(e)))
             pass
 
     def is_valid(self):
@@ -72,7 +78,7 @@ class LineMapping:
 
     @staticmethod
     def compare_source_mappings(mapping, line, column):
-        return (column - mapping.source_column) if (mapping.source_line == line) else line - mapping.source_line 
+        return (column - mapping.source_column) if (mapping.source_line == line) else line - mapping.source_line
 
     @staticmethod
     def binary_search(line_mappings, line, column, comparator):
@@ -112,7 +118,7 @@ class SourceMapParser:
             not content["mappings"] or
             type(content["mappings"]) is not str or
             not content["sources"] or
-            len(content["sources"]) is 0):
+                len(content["sources"]) is 0):
             return None
 
         max_file_num = len(content["sources"])
@@ -138,14 +144,15 @@ class SourceMapParser:
 
                 # Get relative column offset
                 result = VLQDecoder.decode(encoded_mappings, parsing_index)
-                mapping.generated_column = last_mapping.generated_column + result["value"]
+                mapping.generated_column = last_mapping.generated_column + \
+                    result["value"]
                 last_mapping.generated_column = mapping.generated_column
                 parsing_index += result["chars_read"]
 
                 # Relative source index
                 if (parsing_index < length and
                     encoded_mappings[parsing_index] != SourceMapParser.ScopeOrLineDelimiter and
-                    encoded_mappings[parsing_index] != SourceMapParser.SegmentDelimiter):
+                        encoded_mappings[parsing_index] != SourceMapParser.SegmentDelimiter):
                     result = VLQDecoder.decode(encoded_mappings, parsing_index)
                     current_file += result["value"]
 
@@ -159,25 +166,27 @@ class SourceMapParser:
                 # Relative source line
                 if (parsing_index < length and
                     encoded_mappings[parsing_index] != SourceMapParser.ScopeOrLineDelimiter and
-                    encoded_mappings[parsing_index] != SourceMapParser.SegmentDelimiter):
+                        encoded_mappings[parsing_index] != SourceMapParser.SegmentDelimiter):
                     result = VLQDecoder.decode(encoded_mappings, parsing_index)
-                    mapping.source_line = last_mapping.source_line + result["value"]
+                    mapping.source_line = last_mapping.source_line + \
+                        result["value"]
                     last_mapping.source_line = mapping.source_line
                     parsing_index += result["chars_read"]
 
                 # Relative source column
                 if (parsing_index < length and
                     encoded_mappings[parsing_index] != SourceMapParser.ScopeOrLineDelimiter and
-                    encoded_mappings[parsing_index] != SourceMapParser.SegmentDelimiter):
+                        encoded_mappings[parsing_index] != SourceMapParser.SegmentDelimiter):
                     result = VLQDecoder.decode(encoded_mappings, parsing_index)
-                    mapping.source_column = last_mapping.source_column + result["value"]
+                    mapping.source_column = last_mapping.source_column + \
+                        result["value"]
                     last_mapping.source_column = mapping.source_column
                     parsing_index += result["chars_read"]
 
                 # Check if there is a name, ignore it
                 if (parsing_index < length and
                     encoded_mappings[parsing_index] != SourceMapParser.ScopeOrLineDelimiter and
-                    encoded_mappings[parsing_index] != SourceMapParser.SegmentDelimiter):
+                        encoded_mappings[parsing_index] != SourceMapParser.SegmentDelimiter):
                     result = VLQDecoder.decode(encoded_mappings, parsing_index)
                     parsing_index += result["chars_read"]
 

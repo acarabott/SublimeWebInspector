@@ -1,17 +1,18 @@
 import unittest
 import os
 
-import projectsystem
 from projectsystem import DocumentMapping
 
 # Assets path is relative to the test folder. All the tests should be run from the root folder
-assets_path = os.path.abspath("tests" + os.path.sep + "assets").lower() + os.path.sep
+assets_path = os.path.abspath(
+    "tests" + os.path.sep + "assets").lower() + os.path.sep
+
 
 class PositionTests(unittest.TestCase):
     def test_invalid_input_line(self):
         caught_exception = False
         try:
-            position = DocumentMapping.Position("app.js", -1, 0)
+            DocumentMapping.Position("app.js", -1, 0)
         except ValueError:
             caught_exception = True
 
@@ -20,7 +21,7 @@ class PositionTests(unittest.TestCase):
     def test_invalid_input_column(self):
         caught_exception = False
         try:
-            position = DocumentMapping.Position("app.js", 0, -1)
+            DocumentMapping.Position("app.js", 0, -1)
         except ValueError:
             caught_exception = True
 
@@ -29,7 +30,7 @@ class PositionTests(unittest.TestCase):
     def test_invalid_input(self):
         caught_exception = False
         try:
-            position = DocumentMapping.Position("app.js", -4, -3)
+            DocumentMapping.Position("app.js", -4, -3)
         except ValueError:
             caught_exception = True
 
@@ -40,6 +41,7 @@ class PositionTests(unittest.TestCase):
         self.assertEqual(position.file_name(), "app.js")
         self.assertEqual(position.zero_based_line(), 1)
         self.assertEqual(position.zero_based_column(), 1)
+
 
 class MappingInfoTests(unittest.TestCase):
     def test_invalid_generated_file_does_not_throw(self):
@@ -57,7 +59,8 @@ class MappingInfoTests(unittest.TestCase):
     def test_authored_sources(self):
         mapping = DocumentMapping.MappingInfo(assets_path + "app.js")
         self.assertEqual(len(mapping.get_authored_files()), 1)
-        self.assertEqual(mapping.get_authored_files(), [assets_path + "app.ts"])
+        self.assertEqual(mapping.get_authored_files(),
+                         [assets_path + "app.ts"])
 
     def test_generated_file(self):
         mapping = DocumentMapping.MappingInfo(assets_path + "app.js")
@@ -74,12 +77,14 @@ class MappingInfoTests(unittest.TestCase):
     def test_generated_position_casing(self):
         ''' Should match case insensitively (note map already has name aPp.Ts) '''
         mapping = DocumentMapping.MappingInfo(assets_path + "app.js")
-        position = mapping.get_generated_position(assets_path.upper() + "APP.ts", 16, 12)
+        position = mapping.get_generated_position(
+            assets_path.upper() + "APP.ts", 16, 12)
         self.assertIsNotNone(position)
 
     def test_generated_position(self):
         mapping = DocumentMapping.MappingInfo(assets_path + "app.js")
-        position = mapping.get_generated_position(assets_path + "app.ts", 16, 12)
+        position = mapping.get_generated_position(
+            assets_path + "app.ts", 16, 12)
 
         self.assertEqual(position.file_name(), assets_path + "app.js")
         self.assertEqual(position.zero_based_line(), 10)
@@ -99,11 +104,13 @@ class MappingInfoTests(unittest.TestCase):
         mapping = DocumentMapping.MappingInfo(assets_path + "app.js")
 
         # Should map to last line and column in the generated file
-        position = mapping.get_generated_position(assets_path + "app.ts", 300, 3000)
+        position = mapping.get_generated_position(
+            assets_path + "app.ts", 300, 3000)
 
         self.assertEqual(position.file_name(), assets_path + "app.js")
         self.assertEqual(position.zero_based_line(), 29)
         self.assertEqual(position.zero_based_column(), 2)
+
 
 class MappingsManagerTests(unittest.TestCase):
     def test_create_invalid_mapping(self):
@@ -132,7 +139,8 @@ class MappingsManagerTests(unittest.TestCase):
         DocumentMapping.MappingsManager.create_mapping(file_name)
 
         # Now request the mapping using its authored file name
-        mapping = DocumentMapping.MappingsManager.get_mapping(assets_path + "app.ts")
+        mapping = DocumentMapping.MappingsManager.get_mapping(
+            assets_path + "app.ts")
 
         self.assertTrue(mapping.is_valid())
 
@@ -140,17 +148,23 @@ class MappingsManagerTests(unittest.TestCase):
         file_name = assets_path + "app.js"
         DocumentMapping.MappingsManager.create_mapping(file_name)
 
-        self.assertTrue(DocumentMapping.MappingsManager.is_authored_file(assets_path + "app.ts"))
-        self.assertFalse(DocumentMapping.MappingsManager.is_authored_file(file_name))
-        self.assertFalse(DocumentMapping.MappingsManager.is_authored_file("Foo.js"))
+        self.assertTrue(DocumentMapping.MappingsManager.is_authored_file(
+            assets_path + "app.ts"))
+        self.assertFalse(
+            DocumentMapping.MappingsManager.is_authored_file(file_name))
+        self.assertFalse(
+            DocumentMapping.MappingsManager.is_authored_file("Foo.js"))
 
     def test_is_generated_file(self):
         file_name = assets_path + "app.js"
         DocumentMapping.MappingsManager.create_mapping(file_name)
 
-        self.assertTrue(DocumentMapping.MappingsManager.is_generated_file(file_name))
-        self.assertFalse(DocumentMapping.MappingsManager.is_generated_file(assets_path + "app.ts"))
-        self.assertFalse(DocumentMapping.MappingsManager.is_generated_file("Foo.js"))
+        self.assertTrue(
+            DocumentMapping.MappingsManager.is_generated_file(file_name))
+        self.assertFalse(DocumentMapping.MappingsManager.is_generated_file(
+            assets_path + "app.ts"))
+        self.assertFalse(
+            DocumentMapping.MappingsManager.is_generated_file("Foo.js"))
 
     def test_delete_mapping(self):
         file_name = assets_path + "app.js"
@@ -159,8 +173,10 @@ class MappingsManagerTests(unittest.TestCase):
         DocumentMapping.MappingsManager.delete_mapping(file_name)
 
         # Ensure both the generated and authored files do not have mappings
-        self.assertFalse(DocumentMapping.MappingsManager.get_mapping(file_name))
-        self.assertFalse(DocumentMapping.MappingsManager.get_mapping(assets_path + "app.ts"))
+        self.assertFalse(
+            DocumentMapping.MappingsManager.get_mapping(file_name))
+        self.assertFalse(DocumentMapping.MappingsManager.get_mapping(
+            assets_path + "app.ts"))
 
     def test_delete_all_mapping(self):
         file_name = assets_path + "app.js"
@@ -171,5 +187,7 @@ class MappingsManagerTests(unittest.TestCase):
 
         # Ensure both the generated and authored files do not have mappings
         self.assertFalse(DocumentMapping.MappingsManager.get_mapping("Foo.js"))
-        self.assertFalse(DocumentMapping.MappingsManager.get_mapping(file_name))
-        self.assertFalse(DocumentMapping.MappingsManager.get_mapping(assets_path + "app.ts"))
+        self.assertFalse(
+            DocumentMapping.MappingsManager.get_mapping(file_name))
+        self.assertFalse(DocumentMapping.MappingsManager.get_mapping(
+            assets_path + "app.ts"))
