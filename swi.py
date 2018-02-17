@@ -1116,13 +1116,22 @@ def change_to_call_frame(callFrame):
         first_scope.object.objectId, True), console_add_properties, params)
 
 
+def focus_restore_decorate(func):
+    def wrapped(*args):
+        focus_window = sublime.active_window()
+        prev_view = focus_window.active_view()
+        print("before")
+        func(*args)
+        print("after")
+        focus_window.focus_view(prev_view)
+
+    return wrapped
+
+
+@focus_restore_decorate
 def console_repeat_message(count):
     v = views.find_or_create_view('console')
-
     v.run_command('swi_console_repeat_message_internal', {"count": count})
-
-    v.show(v.size())
-    window.focus_group(0)
 
 
 class SwiConsoleRepeatMessageInternalCommand(sublime_plugin.TextCommand):
@@ -1139,14 +1148,12 @@ class SwiConsoleRepeatMessageInternalCommand(sublime_plugin.TextCommand):
 eval_object_queue = []
 
 
+@focus_restore_decorate
 def console_add_evaluate(eval_object):
     v = views.find_or_create_view('console')
 
     eval_object_queue.append(eval_object)
     v.run_command('swi_console_add_evaluate_internal')
-
-    v.show(v.size())
-    window.focus_group(0)
 
 
 class SwiConsoleAddEvaluateInternalCommand(sublime_plugin.TextCommand):
@@ -1162,14 +1169,12 @@ class SwiConsoleAddEvaluateInternalCommand(sublime_plugin.TextCommand):
 message_queue = []
 
 
+@focus_restore_decorate
 def console_add_message(message):
     v = views.find_or_create_view('console')
 
     message_queue.append(message)
     v.run_command('swi_console_add_message_internal')
-
-    v.show(v.size())
-    window.focus_group(0)
 
 
 class SwiConsoleAddMessageInternalCommand(sublime_plugin.TextCommand):
@@ -1268,7 +1273,7 @@ class SwiConsoleAddMessageInternalCommand(sublime_plugin.TextCommand):
 
 properties_queue = []
 
-
+@focus_restore_decorate
 def console_add_properties(params):
     utils.assert_main_thread()
 
@@ -1276,9 +1281,6 @@ def console_add_properties(params):
 
     properties_queue.append(params)
     v.run_command('swi_console_print_properties_internal')
-
-    v.show(0)
-    window.focus_group(0)
 
 
 class SwiConsolePrintPropertiesInternalCommand(sublime_plugin.TextCommand):
@@ -1364,16 +1366,13 @@ class SwiConsolePrintPropertiesInternalCommand(sublime_plugin.TextCommand):
 call_frames_queue = []
 
 
+@focus_restore_decorate
 def console_show_stack(callFrames):
-
     v = views.find_or_create_view('stack')
 
     call_frames_queue.append(callFrames)
 
     v.run_command('swi_console_show_stack_internal')
-
-    v.show(0)
-    window.focus_group(0)
 
 
 class SwiConsoleShowStackInternalCommand(sublime_plugin.TextCommand):
