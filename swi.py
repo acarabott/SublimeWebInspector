@@ -1039,21 +1039,22 @@ def close_all_our_windows():
     if not window:
         window = sublime.active_window()
 
-    window.focus_group(0)
-    for v in window.views_in_group(0):
-        if v.name() == 'File mapping':
-            window.run_command("close")
-            break
+    # TODO decide if want to do this
+    # window.focus_group(0)
+    # for v in window.views_in_group(0):
+    #     if v.name() == 'File mapping':
+    #         window.run_command("close")
+    #         break
 
-    window.focus_group(1)
-    for v in window.views_in_group(1):
-        window.run_command("close")
+    # window.focus_group(1)
+    # for v in window.views_in_group(1):
+    #     window.run_command("close")
 
-    window.focus_group(2)
-    for v in window.views_in_group(2):
-        window.run_command("close")
+    # window.focus_group(2)
+    # for v in window.views_in_group(2):
+    #     window.run_command("close")
 
-    window.set_layout(original_layout)
+    # window.set_layout(original_layout)
 
 
 def update_stack(data):
