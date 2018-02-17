@@ -223,8 +223,7 @@ def find_or_create_view(console_type, create=True):
 
 
 def wrap_view(v):
-    """     Convert a Sublime View into an SWIDebugView
-    """
+    """Convert a Sublime View into an SWIDebugView"""
     if isinstance(v, SwiDebugView):
         return v
     if isinstance(v, sublime.View):
